@@ -4,7 +4,7 @@ const path = require("path")
 const methodOverride = require("method-override")
 const mongoose = require("mongoose")
 const Resident = require('./models/residents');
-const Visitor = 
+const Visitor = require('./models/visitor');
 
 
 mongoose.connect('mongodb://127.0.0.1:27017/test')
@@ -22,10 +22,6 @@ app.set("views", path.join(__dirname, "/views"))
 app.use(express.urlencoded({extended: true}))
 app.use(methodOverride('_method'))
 app.use(express.json())
-
-app.get("/login", (req, res) => {
-    res.render("initialise")
-})
 
 app.get("/resident_sign_up", (req, res) => {
     res.render("resident_sign_up")
@@ -64,15 +60,15 @@ app.get("/visitor_sign_up", (req, res) => {
 })
 
 app.post("/visitor_sign_up", async (req, res) => {
-    const { name, phone_number, vehicle_number, entry, tenure_hours } = req.body;
+    const { name, phone_number, vehicle_number, entryDate, tenure_hours } = req.body;
 
     try {
         // Create a new Resident instance with form data
-        const newResident = new Resident({
+        const newVisitor = new Visitor({
             name: name,
             phone_number: phone_number,
             vehicle_number: vehicle_number,
-            entry: entry,
+            entry: entryDate,
             tenure_hours: tenure_hours
         });
 
@@ -85,7 +81,7 @@ app.post("/visitor_sign_up", async (req, res) => {
         res.redirect("/home");
     } catch (error) {
         // If there is an error, handle it
-        console.error("Error adding Resident:", error.message);
+        console.error("Error adding Visitor:", error.message);
         // Redirect to an error page or handle the error in another way
         res.redirect("/error");
     }

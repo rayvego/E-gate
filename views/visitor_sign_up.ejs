@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .visitor-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="visitor-form">
+    <h1>Visitor Registration</h1>
+    <form id="visitorForm" action="/visitor_sign_up" method="POST">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone_number" required>
+            <!-- The pattern attribute ensures 10-digit phone numbers -->
+        </div>
+        <div class="form-group">
+            <label for="vehicle">Vehicle Number:</label>
+            <input type="text" id="vehicle" name="vehicle_number">
+        </div>
+        <div class="form-group">
+            <label for="entryDate">Entry Date:</label>
+            <input type="datetime-local" id="entryDate" name="entryDate" required>
+            <!-- The datetime-local type allows both date and time input -->
+        </div>
+        <div class="form-group">
+            <label for="tenure_hours">Tenure (in hours):</label>
+            <input type="number" id="tenure_hours" name="tenure_hours" required>
+            <!-- The min attribute ensures a minimum value of 1 -->
+        </div>
+        <div class="form-group">
+            <button type="submit">Register Visitor</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
