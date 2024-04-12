@@ -4,6 +4,7 @@ const path = require("path")
 const methodOverride = require("method-override")
 const mongoose = require("mongoose")
 const Resident = require('./models/residents');
+const Visitor = 
 
 
 mongoose.connect('mongodb://127.0.0.1:27017/test')
@@ -47,6 +48,38 @@ app.post("/resident_sign_up", async (req, res) => {
         const savedResident = await newResident.save();
 
         console.log("New Resident added:", savedResident);
+
+        // Redirect to the home page or wherever you want
+        res.redirect("/home");
+    } catch (error) {
+        // If there is an error, handle it
+        console.error("Error adding Resident:", error.message);
+        // Redirect to an error page or handle the error in another way
+        res.redirect("/error");
+    }
+});
+
+app.get("/visitor_sign_up", (req, res) => {
+    res.render("visitor_sign_up")
+})
+
+app.post("/visitor_sign_up", async (req, res) => {
+    const { name, phone_number, vehicle_number, entry, tenure_hours } = req.body;
+
+    try {
+        // Create a new Resident instance with form data
+        const newResident = new Resident({
+            name: name,
+            phone_number: phone_number,
+            vehicle_number: vehicle_number,
+            entry: entry,
+            tenure_hours: tenure_hours
+        });
+
+        // Save the newResident to the database
+        const savedVisitor = await newVisitor.save();
+
+        console.log("New Resident added:", savedVisitor);
 
         // Redirect to the home page or wherever you want
         res.redirect("/home");
