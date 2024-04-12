@@ -94,6 +94,11 @@ app.post("/visitor_sign_up", async (req, res) => {
 app.post("/login", (req, res) => {
 
 })
+
+app.get("/", (req, res) => {
+    res.render("home")
+})
+
 app.use((req, res) => {
     console.log("Got a request!")
     res.send("This is a response")

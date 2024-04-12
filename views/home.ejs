@@ -1,13 +1,97 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Forms</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 100vh;
+            background-color: #f7f7f7;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .button-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .button-container button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .icon {
+            width: 100px; /* Adjust icon size */
+            height: 100px; /* Adjust icon size */
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
 <h1>Welcome!</h1>
+
+<div class="column">
+    <form action="/security" method="GET">
+        <img src="https://via.placeholder.com/100" alt="Security Icon" class="icon">
+        <div class="button-container">
+            <button type="submit">Submit to Security</button>
+        </div>
+    </form>
+</div>
+
+<div class="column">
+    <form action="/resident_sign_up" method="GET">
+        <img src="https://via.placeholder.com/100" alt="Resident Icon" class="icon">
+        <div class="button-container">
+            <button type="submit">Resident Sign Up</button>
+        </div>
+    </form>
+</div>
+
+<div class="column">
+    <form action="/visitor_sign_up" method="GET">
+        <img src="https://via.placeholder.com/100" alt="Visitor Icon" class="icon">
+        <div class="button-container">
+            <button type="submit">Visitor Sign Up</button>
+        </div>
+    </form>
+</div>
 </body>
 </html>
