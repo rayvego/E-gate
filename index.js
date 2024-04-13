@@ -1,10 +1,13 @@
 const express = require("express")
 const app = express()
+
 const path = require("path")
 const methodOverride = require("method-override")
+
 const mongoose = require("mongoose")
 const Resident = require('./models/residents');
 const Visitor = require('./models/visitor');
+
 const passport = require('passport');
 const initializePassport = require('./passport-config');
 const session = require('express-session');
@@ -113,9 +116,13 @@ app.post('/login', passport.authenticate('local', {
     failureFlash: true
 }));
 
-app.post('/logout', (req, res) => {
-    req.logout();
-    res.redirect('/login');
+app.post('/logout', (req, res, next) => {
+    req.logout((err) => {
+        if (err) {
+            return next(err);
+        }
+        res.redirect('/login');
+    });
 });
 
 const ensureAuthenticated = (req, res, next) => {
