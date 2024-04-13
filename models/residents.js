@@ -20,12 +20,19 @@ const residentSchema = new mongoose.Schema({
         required: true,
         unique: true,
         lowercase: true,
-        match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address']
+        match: [
+            /^[a-zA-Z0-9._%+-]+@iitgn\.ac\.in$/,
+            "Please enter a valid IITGN email address",
+        ],
     },
     identification_code: {
         type: Number,
         // required: true,
         unique: true
+    },
+    otp: {
+        type: String,
+        required: false,
     }
 })
 

@@ -13,6 +13,9 @@ const initializePassport = require('./passport-config');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 
+const nodemailer = require('nodemailer');
+const crypto = require('crypto'); // Built-in Node.js module for generating random bytes
+
 app.use(session({
     secret: 'abcdef',
     resave: false,
@@ -24,6 +27,14 @@ initializePassport(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Create a Nodemailer transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // or any other email service
+    auth: {
+        user: 'mineman270@gmail.com',
+        pass: 'Absent_Minded_Genius'
+    }
+});
 
 mongoose.connect('mongodb://127.0.0.1:27017/test')
     .then(() => {
@@ -50,12 +61,51 @@ app.post("/resident_sign_up", async (req, res) => {
     const { email, password, name, pnumber, identification_code } = req.body;
 
     try {
+        // Check if the email already exists
+        const existingResident = await Resident.findOne({ email_id: email });
+        if (existingResident) {
+            return res.status(400).send('Email already exists');
+        }
+
+        // Generate a random 6-digit OTP
+        const otp = crypto.randomBytes(3).toString('hex');
+
+        // Send the OTP via email
+        const mailOptions = {
+            from: 'mineman270@gmail.com',
+            to: email,
+            subject: 'Email Verification OTP',
+            text: `Your OTP for email verification is: ${otp}`
+        };
+
+        // Use await here
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent: ' + info.response);
+
+        // Render a view or display a prompt for the user to enter the OTP
+        res.render('enterOTP', { email, otp });
+    } catch (error) {
+        console.error("Error adding Resident:", error.message);
+        res.redirect("/");
+    }
+});
+
+app.post('/verifyOTP', async (req, res) => {
+    const { email, otp, password, name, pnumber, identification_code } = req.body;
+
+    try {
+        // Check if the OTP is valid
+        const resident = await Resident.findOne({ email_id: email, otp });
+        if (!resident) {
+            return res.status(400).send('Invalid OTP');
+        }
+
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create a new Resident instance with form data
         const newResident = new Resident({
-            name: name,
+            name,
             password: hashedPassword,
             phone_number: pnumber,
             email_id: email,
@@ -65,6 +115,10 @@ app.post("/resident_sign_up", async (req, res) => {
         // Save the newResident to the database
         const savedResident = await newResident.save();
         console.log("New Resident added:", savedResident);
+
+        // Clear the OTP from the database
+        resident.otp = undefined;
+        await resident.save();
 
         // Redirect to the login page or wherever you want
         res.redirect("/login");
@@ -94,7 +148,7 @@ app.post("/visitor_sign_up", async (req, res) => {
         // Save the newResident to the database
         const savedVisitor = await newVisitor.save();
 
-        console.log("New Resident added:", savedVisitor);
+        console.log("New Visitor added:", savedVisitor);
 
         // Redirect to the home page or wherever you want
         res.redirect("/home");

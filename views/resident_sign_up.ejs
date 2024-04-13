@@ -63,7 +63,7 @@
         <form action="/resident_sign_up" method="POST">
             <div>
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" required pattern="[a-zA-Z0-9._%+-]+@iitgn\.ac\.in$" title="Please enter a valid IITGN email address">
             </div>
             <div>
                 <label for="password">Password:</label>
