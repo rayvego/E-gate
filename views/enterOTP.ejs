@@ -9,8 +9,9 @@
     <h1>Enter OTP</h1>
     <form action="/verifyOTP" method="POST">
         <input type="hidden" name="email" value="<%= email %>">
-        <input type="text" name="otp" placeholder="Enter OTP" required>
+        <input type="text" name="otp_user_entered" placeholder="Enter OTP" required>
         <input type="hidden" name="password" value="<%= password %>">
+        <input type="hidden" name="otp" value="<%= otp %>">
         <input type="hidden" name="name" value="<%= name %>">
         <input type="hidden" name="pnumber" value="<%= pnumber %>">
         <input type="hidden" name="identification_code" value="<%= identification_code %>">

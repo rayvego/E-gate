@@ -31,8 +31,8 @@ app.use(passport.session());
 const transporter = nodemailer.createTransport({
     service: 'gmail', // or any other email service
     auth: {
-        user: 'mineman270@gmail.com',
-        pass: 'Absent_Minded_Genius'
+        user: '23110208@iitgn.ac.in',
+        pass: 'Absent_Minded_Genius0'
     }
 });
 
@@ -53,9 +53,83 @@ app.use(express.urlencoded({extended: true}))
 app.use(methodOverride('_method'))
 app.use(express.json())
 
+async function generateMasterPasswordHash(plainTextPassword) {
+    const saltRounds = 10; // Recommended number of salt rounds
+    const hash = await bcrypt.hash(plainTextPassword, saltRounds);
+    return hash;
+}
+
+let storedMasterPasswordHash;
+async function storeMasterPasswordHash() {
+    const myMasterPassword = 'letmein'; // Replace with your actual password
+    storedMasterPasswordHash = await generateMasterPasswordHash(myMasterPassword);
+    console.log(storedMasterPasswordHash); // Now you can access the hash
+}
+
+storeMasterPasswordHash();
+
+
+function checkAdminAuthentication(req, res, next) {
+    if (req.session.adminAuthenticated) {
+        next();
+    } else {
+        res.redirect("/admin-login");
+    }
+}
+
+app.get("/admin-area", checkAdminAuthentication, async (req, res) => {
+    try {
+        // Fetch residents from the database
+        const residents = await Resident.find();
+        // Render the infoList template with the fetched residents
+        res.render("infoList", { residents });
+    } catch (error) {
+        console.error("Error fetching residents:", error.message);
+        res.status(500).send("Error fetching residents");
+    }
+});
+
+app.get("/admin-login", (req, res) => {
+    res.render('admin_login')
+})
+app.post("/admin-login", async (req, res) => {
+    const { password } = req.body;
+
+    const isMatch = await bcrypt.compare(password, storedMasterPasswordHash)
+
+    if (isMatch) {
+        req.session.adminAuthenticated = true;
+        res.redirect("/admin-area");
+    } else {
+        res.render("admin_login", { error: "Invalid password" });
+    }
+});
+
 app.get("/resident_sign_up", (req, res) => {
     res.render("resident_sign_up")
 })
+
+app.get("/scanner", async (req,res) => {
+    try{
+        res.render("scanner.ejs")
+    }
+    catch(error){
+        console.error("Error fetching residents:", error.message);
+        res.status(500).send("Error fetching residents");
+    }
+})
+
+app.get("/namelist", async (req, res) => {
+    try {
+        // Fetch residents from the database
+        const residents = await Resident.find();
+        // Render the infoList template with the fetched residents
+        res.render("infoList", { residents });
+    } catch (error) {
+        console.error("Error fetching residents:", error.message);
+        res.status(500).send("Error fetching residents");
+    }
+});
 
 app.post("/resident_sign_up", async (req, res) => {
     const { email, password, name, pnumber, identification_code } = req.body;
@@ -69,10 +143,11 @@ app.post("/resident_sign_up", async (req, res) => {
 
         // Generate a random 6-digit OTP
         const otp = crypto.randomBytes(3).toString('hex');
+        console.log(otp)
 
         // Send the OTP via email
         const mailOptions = {
-            from: 'mineman270@gmail.com',
+            from: '23110208@iitgn.ac.in',
             to: email,
             subject: 'Email Verification OTP',
             text: `Your OTP for email verification is: ${otp}`
@@ -83,7 +158,7 @@ app.post("/resident_sign_up", async (req, res) => {
         console.log('Email sent: ' + info.response);
 
         // Render a view or display a prompt for the user to enter the OTP
-        res.render('enterOTP', { email, otp });
+        res.render('enterOTP', { email, otp, password, name, pnumber, identification_code });
     } catch (error) {
         console.error("Error adding Resident:", error.message);
         res.redirect("/");
@@ -91,17 +166,17 @@ app.post("/resident_sign_up", async (req, res) => {
 });
 
 app.post('/verifyOTP', async (req, res) => {
-    const { email, otp, password, name, pnumber, identification_code } = req.body;
-
+    const { email, otp, password, name, pnumber, identification_code, otp_user_entered } = req.body;
+    console.log(otp, otp_user_entered)
     try {
         // Check if the OTP is valid
-        const resident = await Resident.findOne({ email_id: email, otp });
-        if (!resident) {
+        if (otp_user_entered !== otp) {
             return res.status(400).send('Invalid OTP');
         }
 
+
         // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
         // Create a new Resident instance with form data
         const newResident = new Resident({
@@ -116,8 +191,7 @@ app.post('/verifyOTP', async (req, res) => {
         const savedResident = await newResident.save();
         console.log("New Resident added:", savedResident);
 
-        // Clear the OTP from the database
-        resident.otp = undefined;
+        const resident = await Resident.findOneAndUpdate({ email_id: email }, { otp: otp }, { new: true });
         await resident.save();
 
         // Redirect to the login page or wherever you want
