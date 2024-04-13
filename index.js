@@ -1,72 +1,71 @@
-const express = require("express")
-const app = express()
-const path = require("path")
-const methodOverride = require("method-override")
-const mongoose = require("mongoose")
+const express = require("express");
+const app = express();
+const path = require("path");
+const methodOverride = require("method-override");
+const mongoose = require("mongoose");
 const Resident = require('./models/residents');
 const Visitor = require('./models/visitor');
+const { signUpWithEmailAndPassword, signInWithEmailAndPassword } = require("./client");
 
-const firebase = require("firebase/app");
-require("firebase/auth");
+// Middleware setup
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "/views"));
+app.use(express.urlencoded({extended: true}));
+app.use(methodOverride('_method'));
+app.use(express.json());
 
-const firebaseConfig = {
-    // Your Firebase Config from the Firebase Console
-};
-
-firebase.initializeApp(firebaseConfig);
-
+// Database connection
 mongoose.connect('mongodb://127.0.0.1:27017/test')
     .then(() => {
-        console.log("Connection Successful")
+        console.log("MongoDB connected successfully");
     })
     .catch(err => {
-        console.log("Connection Failed")
-        console.log(err)
-    })
+        console.error("MongoDB connection failed:", err);
+    });
 
-app.set("view engine", "ejs")
-app.set("views", path.join(__dirname, "/views"))
-
-app.use(express.urlencoded({extended: true}))
-app.use(methodOverride('_method'))
-app.use(express.json())
-
+// Routes
 app.get("/resident_sign_up", (req, res) => {
-    res.render("resident_sign_up")
-})
+    res.render("resident_sign_up");
+});
 
 app.post("/resident_sign_up", async (req, res) => {
     const { email, password, name, pnumber, identification_code } = req.body;
 
     try {
-        // Create a Firebase user with email and password
-        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        // Call the signUpWithEmailAndPassword function to create a Firebase user
+        const signUpResult = await signUpWithEmailAndPassword(email, password);
 
-        // Save additional user data to MongoDB
-        const newResident = new Resident({
-            name: name,
-            password: password,
-            phone_number: pnumber,
-            email_id: email,
-            identification_code: identification_code,
-            // You might want to save the Firebase UID for linking purposes
-            firebase_uid: userCredential.user.uid
-        });
+        // Check if sign-up was successful
+        if (signUpResult.success) {
+            // Save additional user data to MongoDB
+            const newResident = new Resident({
+                name: name,
+                password: password,
+                phone_number: pnumber,
+                email_id: email,
+                identification_code: identification_code,
+                // You might want to save the Firebase UID for linking purposes
+                firebase_uid: signUpResult.user.uid // Make sure to handle this accordingly in signUpWithEmailAndPassword function
+            });
 
-        const savedResident = await newResident.save();
-        console.log("New Resident added:", savedResident);
+            const savedResident = await newResident.save();
+            console.log("New Resident added:", savedResident);
 
-        res.redirect("/home");
+            res.redirect("/home");
+        } else {
+            // If sign-up failed, redirect to an error page
+            console.error("Error signing up:", signUpResult.errorMessage);
+            res.redirect("/error");
+        }
     } catch (error) {
         console.error("Error adding Resident:", error.message);
         res.redirect("/error");
     }
 });
 
-
 app.get("/visitor_sign_up", (req, res) => {
-    res.render("visitor_sign_up")
-})
+    res.render("visitor_sign_up");
+});
 
 app.post("/visitor_sign_up", async (req, res) => {
     const { name, phone_number, vehicle_number, entryDate, tenure_hours } = req.body;
@@ -96,18 +95,20 @@ app.post("/visitor_sign_up", async (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-
-})
+    // Implementation for login
+});
 
 app.get("/", (req, res) => {
-    res.render("home")
-})
+    res.render("home");
+});
 
 app.use((req, res) => {
-    console.log("Got a request!")
-    res.send("This is a response")
-})
+    console.log("Got a request!");
+    res.send("This is a response");
+});
 
-app.listen(5000, () => {
-    console.log("Listening on port 5000")
-})
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
