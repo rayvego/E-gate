@@ -23,12 +23,7 @@ const visitorSchema = new mongoose.Schema({
     tenure_hours: {
         type: Number,
         required: true
-    },
-    firebase_uid: {
-        type: String, // Store the Firebase UID here
-        required: true,
-        unique: true,
-    },
+    }
 })
 
 const Visitor = mongoose.model("Visitor", visitorSchema)

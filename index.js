@@ -1,127 +1,143 @@
-const express = require("express");
-const app = express();
-const path = require("path");
-const methodOverride = require("method-override");
-const mongoose = require("mongoose");
+const express = require("express")
+const app = express()
+const path = require("path")
+const methodOverride = require("method-override")
+const mongoose = require("mongoose")
 const Resident = require('./models/residents');
 const Visitor = require('./models/visitor');
+const passport = require('passport');
+const initializePassport = require('./passport-config');
+const session = require('express-session');
+const bcrypt = require('bcrypt');
 
-// firebase
-const { initializeApp } = require("firebase/app");
-const { getAuth, connectAuthEmulator, createUserWithEmailAndPassword, signInWithEmailAndPassword } = require("firebase/auth");
+app.use(session({
+    secret: 'abcdef',
+    resave: false,
+    saveUninitialized: true
+}));
 
-const firebaseApp = initializeApp({
-    apiKey: "AIzaSyAjUq2CD_SbUxboTfLlcIWSW1XHNHc9nWI",
-    authDomain: "e-gate-7be9a.firebaseapp.com",
-    projectId: "e-gate-7be9a",
-    storageBucket: "e-gate-7be9a.appspot.com",
-    messagingSenderId: "529642317694",
-    appId: "1:529642317694:web:397b1702b3047a0f45752f",
-    measurementId: "G-0XVGEF3S20"
-});
+initializePassport(passport);
 
-const auth = getAuth(firebaseApp)
-connectAuthEmulator(auth, "https://localhost:5000")
+app.use(passport.initialize());
+app.use(passport.session());
 
 
-// Middleware setup
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "/views"));
-app.use(express.urlencoded({extended: true}));
-app.use(methodOverride('_method'));
-app.use(express.json());
-
-// Database connection
 mongoose.connect('mongodb://127.0.0.1:27017/test')
     .then(() => {
-        console.log("MongoDB connected successfully");
+        console.log("Connection Successful")
     })
     .catch(err => {
-        console.error("MongoDB connection failed:", err);
-    });
+        console.log("Connection Failed")
+        console.log(err)
+    })
 
-// Routes
+
+app.set("view engine", "ejs")
+app.set("views", path.join(__dirname, "/views"))
+
+app.use(express.urlencoded({extended: true}))
+app.use(methodOverride('_method'))
+app.use(express.json())
+
 app.get("/resident_sign_up", (req, res) => {
-    res.render("resident_sign_up");
-});
+    res.render("resident_sign_up")
+})
 
 app.post("/resident_sign_up", async (req, res) => {
     const { email, password, name, pnumber, identification_code } = req.body;
-    console.log(email, password)
+
     try {
-        // Call the createUserWithEmailAndPassword function to create a Firebase user
-        const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Check if sign-up was successful
-        if (signUpResult.success) {
-            // Save additional user data to MongoDB
-            const newResident = new Resident({
-                name: name,
-                password: password,
-                phone_number: pnumber,
-                email_id: email,
-                identification_code: identification_code,
-                // You might want to save the Firebase UID for linking purposes
-                firebase_uid: signUpResult.user.uid // Make sure to handle this accordingly in createUserWithEmailAndPassword function
-            });
+        // Create a new Resident instance with form data
+        const newResident = new Resident({
+            name: name,
+            password: hashedPassword,
+            phone_number: pnumber,
+            email_id: email,
+            identification_code: identification_code
+        });
 
-            const savedResident = await newResident.save();
-            console.log("New Resident added:", savedResident);
+        // Save the newResident to the database
+        const savedResident = await newResident.save();
+        console.log("New Resident added:", savedResident);
 
-            res.redirect("/home");
-        } else {
-            // If sign-up failed, redirect to an error page
-            console.error("Error signing up:", signUpResult.errorMessage);
-            res.redirect("/error");
-        }
+        // Redirect to the login page or wherever you want
+        res.redirect("/login");
     } catch (error) {
         console.error("Error adding Resident:", error.message);
         res.redirect("/");
     }
 });
 
+app.get("/visitor_sign_up", (req, res) => {
+    res.render("visitor_sign_up")
+})
+
 app.post("/visitor_sign_up", async (req, res) => {
     const { name, phone_number, vehicle_number, entryDate, tenure_hours } = req.body;
 
     try {
-        // Create a Firebase user for Visitors (you can modify this as needed)
-        const userCredential = await createUserWithEmailAndPassword(auth, `${phone_number}@example.com`, "randompassword");
-
-        // Save additional visitor data to MongoDB
+        // Create a new Resident instance with form data
         const newVisitor = new Visitor({
             name: name,
             phone_number: phone_number,
             vehicle_number: vehicle_number,
             entry: entryDate,
-            tenure_hours: tenure_hours,
-            firebase_uid: userCredential.user.uid // Save the Firebase UID
+            tenure_hours: tenure_hours
         });
 
+        // Save the newResident to the database
         const savedVisitor = await newVisitor.save();
-        console.log("New Visitor added:", savedVisitor);
 
+        console.log("New Resident added:", savedVisitor);
+
+        // Redirect to the home page or wherever you want
         res.redirect("/home");
     } catch (error) {
+        // If there is an error, handle it
         console.error("Error adding Visitor:", error.message);
+        // Redirect to an error page or handle the error in another way
         res.redirect("/");
     }
 });
 
-app.post("/login", (req, res) => {
-    // Implementation for login
+app.get('/login', (req, res) => {
+    res.render('login');
+});
+
+app.post('/login', passport.authenticate('local', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/',
+    failureFlash: true
+}));
+
+app.post('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/login');
+});
+
+const ensureAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login');
+};
+
+app.get('/dashboard', ensureAuthenticated, (req, res) => {
+    res.render('dashboard', { resident: req.user });
 });
 
 app.get("/", (req, res) => {
-    res.render("home");
-});
+    res.render("home")
+})
 
 app.use((req, res) => {
-    console.log("Got a request!");
-    res.send("This is a response");
-});
+    console.log("Got a request!")
+    res.send("This is a response")
+})
 
-// Start the server
-const PORT = process.env.PORT || 9099;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.listen(5000, () => {
+    console.log("Listening on port 5000")
+})
