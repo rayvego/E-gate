@@ -1,12 +1,7 @@
 const mongoose = require("mongoose")
-const {v4: uuid} = require("uuid")
 
 // defining schema
 const residentSchema = new mongoose.Schema({
-    _id: {
-        type: String,
-        default: uuid, // Generate a new UUID for each new document
-    },
     name: {
         type: String,
         required: true
@@ -31,7 +26,12 @@ const residentSchema = new mongoose.Schema({
         type: Number,
         required: true,
         unique: true
-    }
+    },
+    firebase_uid: {
+        type: String, // Store the Firebase UID here
+        required: true,
+        unique: true,
+    },
 })
 
 const Resident = mongoose.model("Resident", residentSchema)
