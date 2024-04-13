@@ -4,7 +4,7 @@ const mongoose = require("mongoose")
 const residentSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        // required: true
     },
     password: {
         type: String,
@@ -13,7 +13,7 @@ const residentSchema = new mongoose.Schema({
     phone_number: {
         type: Number,
         required: true,
-        unique: true
+        // unique: true
     },
     email_id: {
         type: String,
@@ -24,7 +24,7 @@ const residentSchema = new mongoose.Schema({
     },
     identification_code: {
         type: Number,
-        required: true,
+        // required: true,
         unique: true
     },
     firebase_uid: {

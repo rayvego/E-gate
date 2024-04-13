@@ -5,7 +5,24 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const Resident = require('./models/residents');
 const Visitor = require('./models/visitor');
-const { signUpWithEmailAndPassword, signInWithEmailAndPassword } = require("./client");
+
+// firebase
+const { initializeApp } = require("firebase/app");
+const { getAuth, connectAuthEmulator, createUserWithEmailAndPassword, signInWithEmailAndPassword } = require("firebase/auth");
+
+const firebaseApp = initializeApp({
+    apiKey: "AIzaSyAjUq2CD_SbUxboTfLlcIWSW1XHNHc9nWI",
+    authDomain: "e-gate-7be9a.firebaseapp.com",
+    projectId: "e-gate-7be9a",
+    storageBucket: "e-gate-7be9a.appspot.com",
+    messagingSenderId: "529642317694",
+    appId: "1:529642317694:web:397b1702b3047a0f45752f",
+    measurementId: "G-0XVGEF3S20"
+});
+
+const auth = getAuth(firebaseApp)
+connectAuthEmulator(auth, "https://localhost:5000")
+
 
 // Middleware setup
 app.set("view engine", "ejs");
@@ -30,10 +47,10 @@ app.get("/resident_sign_up", (req, res) => {
 
 app.post("/resident_sign_up", async (req, res) => {
     const { email, password, name, pnumber, identification_code } = req.body;
-
+    console.log(email, password)
     try {
-        // Call the signUpWithEmailAndPassword function to create a Firebase user
-        const signUpResult = await signUpWithEmailAndPassword(email, password);
+        // Call the createUserWithEmailAndPassword function to create a Firebase user
+        const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
 
         // Check if sign-up was successful
         if (signUpResult.success) {
@@ -45,7 +62,7 @@ app.post("/resident_sign_up", async (req, res) => {
                 email_id: email,
                 identification_code: identification_code,
                 // You might want to save the Firebase UID for linking purposes
-                firebase_uid: signUpResult.user.uid // Make sure to handle this accordingly in signUpWithEmailAndPassword function
+                firebase_uid: signUpResult.user.uid // Make sure to handle this accordingly in createUserWithEmailAndPassword function
             });
 
             const savedResident = await newResident.save();
@@ -59,12 +76,8 @@ app.post("/resident_sign_up", async (req, res) => {
         }
     } catch (error) {
         console.error("Error adding Resident:", error.message);
-        res.redirect("/error");
+        res.redirect("/");
     }
-});
-
-app.get("/visitor_sign_up", (req, res) => {
-    res.render("visitor_sign_up");
 });
 
 app.post("/visitor_sign_up", async (req, res) => {
@@ -72,7 +85,7 @@ app.post("/visitor_sign_up", async (req, res) => {
 
     try {
         // Create a Firebase user for Visitors (you can modify this as needed)
-        const userCredential = await firebase.auth().createUserWithEmailAndPassword(`${phone_number}@example.com`, "randompassword");
+        const userCredential = await createUserWithEmailAndPassword(auth, `${phone_number}@example.com`, "randompassword");
 
         // Save additional visitor data to MongoDB
         const newVisitor = new Visitor({
@@ -90,7 +103,7 @@ app.post("/visitor_sign_up", async (req, res) => {
         res.redirect("/home");
     } catch (error) {
         console.error("Error adding Visitor:", error.message);
-        res.redirect("/error");
+        res.redirect("/");
     }
 });
 
@@ -108,7 +121,7 @@ app.use((req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 9099;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
