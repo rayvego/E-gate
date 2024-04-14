@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Details</title>
+</head>
+<body>
+<h1>User Details</h1>
+<% if (userType === 'resident') { %>
+    <p>Name: <%= user.name %></p>
+    <p>Email: <%= user.email_id %></p>
+    <p>Phone Number: <%= user.phone_number %></p>
+    <p>Identification Code: <%= user.identification_code %></p>
+<% } else { %>
+    <p>Name: <%= user.name %></p>
+    <p>Phone Number: <%= user.phone_number %></p>
+    <p>Vehicle Number: <%= user.vehicle_number %></p>
+    <p>Entry Time: <%= user.entry %></p>
+    <p>Tenure Hours: <%= user.tenure_hours %></p>
+<% } %>
+
+<form method="POST" action="/approve-user">
+    <input type="hidden" name="userType" value="<%= userType %>">
+    <% if (userType === 'resident') { %>
+        <input type="hidden" name="userId" value="<%= user.email_id %>">
+    <% } else { %>
+        <input type="hidden" name="userId" value="<%= user.phone_number %>">
+    <% } %>
+    <button type="submit" name="action" value="approve">&#10004; Approve</button>
+    <button type="submit" name="action" value="reject">&#10008; Reject</button>
+</form>
+</body>
+</html>

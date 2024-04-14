@@ -258,27 +258,40 @@ app.post('/scan-qr-code', async (req, res) => {
     try {
         const resident = await Resident.findOne({ phone_number: qrCodeData });
         if (!resident) {
-            return res.status(400).send('Invalid QR code or resident not found');
+            const visitor = await Visitor.findOne({ phone_number: qrCodeData });
+            if (!visitor) {
+                return res.status(400).send('Invalid QR code or user not found');
+            }
+            return res.render('userDetails', { user: visitor, userType: 'visitor' });
         }
-
-        const currentTime = new Date(); // Get the current timestamp
-
-        if (resident.entry) {
-            // Resident is exiting
-            resident.exit = currentTime;
-            resident.entry = null;
-        } else {
-            // Resident is entering
-            resident.entry = currentTime;
-            resident.exit = null;
-        }
-
-        await resident.save();
-
-        res.send('Resident status updated successfully!');
+        return res.render('userDetails', { user: resident, userType: 'resident' });
     } catch (error) {
-        console.error("Error updating resident status:", error.message);
-        res.status(500).send('Error updating resident status');
+        console.error("Error finding user:", error.message);
+        res.status(500).send('Error finding user');
+    }
+});
+
+app.post('/approve-user', async (req, res) => {
+    const { userType, userId, action } = req.body;
+
+    try {
+        if (action === 'approve') {
+            // Handle user approval
+            // You can add any additional logic here, like updating a field in the database
+            console.log('User approved');
+        } else if (action === 'reject') {
+            // Handle user rejection
+            if (userType === 'resident') {
+                await Resident.findOneAndDelete({ email_id: userId });
+            } else {
+                await Visitor.findOneAndDelete({ phone_number: userId });
+            }
+            console.log('User rejected and data removed from the database');
+        }
+        res.redirect('/scanner'); // Redirect to the scanner page or any other desired page
+    } catch (error) {
+        console.error("Error approving/rejecting user:", error.message);
+        res.status(500).send('Error approving/rejecting user');
     }
 });
 
@@ -358,11 +371,11 @@ app.post('/logout', (req, res, next) => {
 
 
 app.get('/dashboard', ensureAuthenticated, (req, res) => {
-    res.render('dashboard', { resident: req.user });
+    res.render('dashboard', { resident: req.user, qrBase64: req.user.qr });
 });
 
 app.get('/visitor-dashboard', ensureAuthenticated, (req, res) => {  // Naming suggestion
-    res.render('dashboard_visitor', { visitor: req.user });
+    res.render('dashboard_visitor', { visitor: req.user, qrBase: req.user.qr });
 });
 
 app.get("/", (req, res) => {

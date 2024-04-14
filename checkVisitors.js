@@ -7,10 +7,10 @@ const checkExpiredVisitors = async () => {
     console.log('Checking for expired visitors...');
     const now = new Date();
     const expiredVisitors = await Visitor.find({
-        entry: { $lte: new Date(now.getTime() - (tenure_hours * 60 * 60 * 1000)) },
+        entry: { $lte: new Date(now.getTime() - (tenure_hours * 1000)) },
         isExpired: { $ne: true } // Add this line to exclude already expired visitors
     });
-
+    console.log(expiredVisitors)
     if (expiredVisitors.length === 0) {
         console.log('No expired visitors found.');
     } else {

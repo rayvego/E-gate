@@ -3,109 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Forms</title>
+    <title>E-Gate: IIT Gandhinagar</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background-color: #f5f5f5;
+            background-image: url(https://c.ndtvimg.com/2019-06/5c94c87o_iit-gandhinagar_625x300_17_June_19.jpg);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            backdrop-filter: blur(2px); /* Adjust the blur value as needed */
+        }
+
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .container {
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f7f7f7;
+            height: calc(100vh - 50px); /* Subtract header height */
         }
 
-        .column {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 20px;
-            padding: 20px;
-            background-color: #fff;
+        .card {
+            background-color: white;
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            width: 250px;
+            margin: 20px;
         }
 
-        h1 {
+        .card img {
+            width: 80px;
+            height: 80px;
             margin-bottom: 20px;
-            text-align: center;
+        }
+
+        .card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
             color: #333;
         }
 
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .card p {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 20px;
         }
 
-        .button-container {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .button-container button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
+        .card button {
             background-color: #007bff;
+            border: none;
             color: white;
-            cursor: pointer;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
             border-radius: 5px;
+            cursor: pointer;
             transition: background-color 0.3s ease;
         }
 
-        .button-container button:hover {
+        .card button:hover {
             background-color: #0056b3;
-        }
-
-        .icon {
-            width: 100px; /* Adjust icon size */
-            height: 100px; /* Adjust icon size */
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 600px) {
-            .column {
-                width: 100%;
-            }
         }
     </style>
 </head>
 <body>
-<h1>Welcome!</h1>
-
-<div class="column">
-    <form action="/admin-area" method="GET">
-        <img src="https://via.placeholder.com/100" alt="Security Icon" class="icon">
-        <div class="button-container">
-            <button type="submit">Submit to Security</button>
-        </div>
-    </form>
-</div>
-
-<div class="column">
-    <form action="/resident_sign_up" method="GET">
-        <img src="https://via.placeholder.com/100" alt="Resident Icon" class="icon">
-        <div class="button-container">
-            <button type="submit">Resident Sign Up</button>
-        </div>
-    </form>
-</div>
-
-<div class="column">
-    <form action="/visitor_sign_up" method="GET">
-        <img src="https://via.placeholder.com/100" alt="Visitor Icon" class="icon">
-        <div class="button-container">
-            <button type="submit">Visitor Sign Up</button>
-        </div>
-    </form>
+<div class="header">E-Gate: IIT Gandhinagar</div>
+<div class="container">
+    <div class="card">
+        <img src="https://via.placeholder.com/80" alt="Security Icon">
+        <h2>Security Personnel</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <a href="/admin-area"><button type="submit">Enter</button></a>
+    </div>
+    <div class="card">
+        <img src="https://via.placeholder.com/80" alt="Resident Icon">
+        <h2>Resident</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <a href="/resident_sign_up"><button type="submit">Enter</button></a>
+    </div>
+    <div class="card">
+        <img src="https://via.placeholder.com/80" alt="Visitor Icon">
+        <h2>Visitor</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <a href="/visitor_sign_up"><button type="submit">Enter</button></a>
+    </div>
 </div>
 </body>
 </html>
