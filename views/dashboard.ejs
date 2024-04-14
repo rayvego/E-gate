@@ -34,6 +34,9 @@
             text-decoration: none;
             border-radius: 3px;
         }
+        .qr-code {
+            margin-top: 20px;
+            display: none;  }
     </style>
 </head>
 <body>
@@ -45,6 +48,10 @@
     <form action="/logout" method="POST">
         <button type="submit">Logout</button>
     </form>
+    <img id="qr-container"  width = '320px' height = '320px' src=<%= resident.qr %> ></img>
 </div>
+<script>console.log(resident.qr)</script>
+
+
 </body>
 </html>

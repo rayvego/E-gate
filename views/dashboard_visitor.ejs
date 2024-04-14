@@ -3,7 +3,7 @@
 <head>
     <title>Dashboard</title>
     <style>
-        /* Same styling as before */
+        /* Add some basic styling */
         body {
             font-family: Arial, sans-serif;
             background-color: #f2f2f2;
@@ -34,6 +34,9 @@
             text-decoration: none;
             border-radius: 3px;
         }
+        .qr-code {
+            margin-top: 20px;
+            display: none;  }
     </style>
 </head>
 <body>
@@ -46,6 +49,10 @@
     <form action="/logout" method="POST">
         <button type="submit">Logout</button>
     </form>
+    <img id="qr-container"  width = '320px' height = '320px' src=<%= visitor.qr %> ></img>
 </div>
+<script>console.log(visitor.qr)</script>
+
+
 </body>
 </html>
