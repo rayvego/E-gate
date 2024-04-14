@@ -7,6 +7,7 @@ const methodOverride = require("method-override")
 const mongoose = require("mongoose")
 const Resident = require('./models/residents');
 const Visitor = require('./models/visitor');
+const { scheduledJob } = require('./checkVisitors');
 
 const passport = require('passport');
 const initializePassport = require('./passport-config');
@@ -15,6 +16,8 @@ const bcrypt = require('bcrypt');
 
 const nodemailer = require('nodemailer');
 const crypto = require('crypto'); // Built-in Node.js module for generating random bytes
+
+const qr = require("qrcode")
 
 app.use(session({
     secret: 'abcdef',
@@ -77,6 +80,17 @@ function checkAdminAuthentication(req, res, next) {
     }
 }
 
+app.get('/stop-job', (req, res) => {
+    if (scheduledJob) {
+        scheduledJob.stop();
+        console.log('Scheduled job stopped');
+        res.send('Scheduled job stopped');
+    } else {
+        res.send('No scheduled job running');
+    }
+});
+
+// figure out all
 app.get("/admin-area", checkAdminAuthentication, async (req, res) => {
     try {
         // Fetch residents from the database
@@ -88,6 +102,32 @@ app.get("/admin-area", checkAdminAuthentication, async (req, res) => {
         res.status(500).send("Error fetching residents");
     }
 });
+
+app.get("/admin-area-residents", checkAdminAuthentication, async (req, res) => {
+    console.log("req received")
+    try {
+        // Fetch residents from the database
+        const residents = await Resident.find();
+        // Render the infoList template with the fetched residents
+        res.render("infoList", { residents });
+    } catch (error) {
+        console.error("Error fetching residents:", error.message);
+        res.status(500).send("Error fetching residents");
+    }
+});
+
+app.get("/admin-area-visitors", checkAdminAuthentication, async (req, res) => {
+    try {
+        // Fetch residents from the database
+        const residents = await Visitor.find();
+        // Render the infoList template with the fetched residents
+        res.render("infoList", { residents });
+    } catch (error) {
+        console.error("Error fetching residents:", error.message);
+        res.status(500).send("Error fetching residents");
+    }
+});
+
 
 app.get("/admin-login", (req, res) => {
     res.render('admin_login')
@@ -118,18 +158,6 @@ app.get("/scanner", async (req,res) => {
         res.status(500).send("Error fetching residents");
     }
 })
-
-app.get("/namelist", async (req, res) => {
-    try {
-        // Fetch residents from the database
-        const residents = await Resident.find();
-        // Render the infoList template with the fetched residents
-        res.render("infoList", { residents });
-    } catch (error) {
-        console.error("Error fetching residents:", error.message);
-        res.status(500).send("Error fetching residents");
-    }
-});
 
 app.post("/resident_sign_up", async (req, res) => {
     const { email, password, name, pnumber, identification_code } = req.body;
@@ -191,6 +219,15 @@ app.post('/verifyOTP', async (req, res) => {
         const savedResident = await newResident.save();
         console.log("New Resident added:", savedResident);
 
+
+        // Generate the QR code containing the phone number
+        const qrDataURL = await qr.toDataURL(pnumber);
+        // Save the QR code image data to MongoDB linked to the resident document
+        savedResident.qr = qrDataURL;
+        await savedResident.save();
+        // Clear the OTP from the database
+        savedResident.otp = undefined;
+
         const resident = await Resident.findOneAndUpdate({ email_id: email }, { otp: otp }, { new: true });
         await resident.save();
 
@@ -199,6 +236,36 @@ app.post('/verifyOTP', async (req, res) => {
     } catch (error) {
         console.error("Error adding Resident:", error.message);
         res.redirect("/");
+    }
+});
+
+app.post('/scan-qr-code', async (req, res) => {
+    const { qrCodeData } = req.body;
+
+    try {
+        const resident = await Resident.findOne({ phone_number: qrCodeData });
+        if (!resident) {
+            return res.status(400).send('Invalid QR code or resident not found');
+        }
+
+        const currentTime = new Date(); // Get the current timestamp
+
+        if (resident.entry) {
+            // Resident is exiting
+            resident.exit = currentTime;
+            resident.entry = null;
+        } else {
+            // Resident is entering
+            resident.entry = currentTime;
+            resident.exit = null;
+        }
+
+        await resident.save();
+
+        res.send('Resident status updated successfully!');
+    } catch (error) {
+        console.error("Error updating resident status:", error.message);
+        res.status(500).send('Error updating resident status');
     }
 });
 

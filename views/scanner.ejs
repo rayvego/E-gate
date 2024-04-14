@@ -36,15 +36,27 @@ HI
     });
 
     scanner.render(success, error);
-    function success(result){
-        document.getElementById('result').innerHTML =`<h2>Success!</h2> <p><a href='${result}'>${result}</a></p>` ;
-        console.log(result);
+
+    function success(result) {
+        axios.post('/scan-qr-code', {
+            qrCodeData: result
+        })
+            .then(response => {
+                document.getElementById('result').innerHTML = '<h2>Success!</h2> <p>' + response.data + '</p>';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = '<h2>Error!</h2> <p>Failed to update resident status.</p>';
+            });
+
         scanner.clear();
         document.getElementById('reader').remove();
     }
+
     function error(err) {
         console.error(err);
     }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </body>
 </html>

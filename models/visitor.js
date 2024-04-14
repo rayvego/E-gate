@@ -23,6 +23,10 @@ const visitorSchema = new mongoose.Schema({
     tenure_hours: {
         type: Number,
         required: true
+    },
+    is_expired: {
+        type: Boolean,
+        default: false
     }
 })
 

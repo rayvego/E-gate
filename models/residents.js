@@ -33,6 +33,18 @@ const residentSchema = new mongoose.Schema({
     otp: {
         type: String,
         required: false,
+    },
+    entry: { // New field for entry status
+        type: Date,
+        default: null
+    },
+    exit: {  // New field for exit status
+        type: Date,
+        default: null
+    },
+    qr: {
+        type: Buffer,
+        default: null
     }
 })
 
