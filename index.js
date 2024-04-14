@@ -12,6 +12,7 @@ const { scheduledJob } = require('./checkVisitors');
 const passport = require('passport');
 const initializePassport = require('./passport-config');
 const session = require('express-session');
+
 const bcrypt = require('bcrypt');
 
 const nodemailer = require('nodemailer');
@@ -24,6 +25,10 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+const flash = require('connect-flash');
+
+app.use(flash());
 
 initializePassport(passport);
 
@@ -71,6 +76,12 @@ async function storeMasterPasswordHash() {
 
 storeMasterPasswordHash();
 
+const ensureAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login');
+};
 
 function checkAdminAuthentication(req, res, next) {
     if (req.session.adminAuthenticated) {
@@ -90,36 +101,45 @@ app.get('/stop-job', (req, res) => {
     }
 });
 
+// Inside your index.js file...
+
+app.get("/residents", checkAdminAuthentication, async (req, res) => {
+    try {
+        const residents = await Resident.find();
+        res.render("residentsList", { residents });
+    } catch (error) {
+        console.error("Error fetching residents:", error.message);
+        res.status(500).send("Error fetching residents");
+    }
+});
+
+app.get("/visitors", checkAdminAuthentication, async (req, res) => {
+    // Similar implementation for fetching visitors from the 'Visitor' model
+    try {
+        const visitors = await Visitor.find();
+        res.render("visitorsList", { visitors });
+    } catch (error) {
+        console.error("Error fetching visitors:", error.message);
+        res.status(500).send("Error fetching visitors");
+    }
+});
+
+app.get("/all-entries", checkAdminAuthentication, async (req, res) => {
+    try {
+        const residents = await Resident.find();
+        const visitors = await Visitor.find();
+        res.render("allEntriesList", { residents, visitors });
+    } catch (error) {
+        console.error("Error fetching all entries:", error.message);
+        res.status(500).send("Error fetching all entries");
+    }
+});
+
 // figure out all
 app.get("/admin-area", checkAdminAuthentication, async (req, res) => {
     try {
         // Fetch residents from the database
         const residents = await Resident.find();
-        // Render the infoList template with the fetched residents
-        res.render("infoList", { residents });
-    } catch (error) {
-        console.error("Error fetching residents:", error.message);
-        res.status(500).send("Error fetching residents");
-    }
-});
-
-app.get("/admin-area-residents", checkAdminAuthentication, async (req, res) => {
-    console.log("req received")
-    try {
-        // Fetch residents from the database
-        const residents = await Resident.find();
-        // Render the infoList template with the fetched residents
-        res.render("infoList", { residents });
-    } catch (error) {
-        console.error("Error fetching residents:", error.message);
-        res.status(500).send("Error fetching residents");
-    }
-});
-
-app.get("/admin-area-visitors", checkAdminAuthentication, async (req, res) => {
-    try {
-        // Fetch residents from the database
-        const residents = await Visitor.find();
         // Render the infoList template with the fetched residents
         res.render("infoList", { residents });
     } catch (error) {
@@ -202,9 +222,8 @@ app.post('/verifyOTP', async (req, res) => {
             return res.status(400).send('Invalid OTP');
         }
 
-
         // Hash the password
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create a new Resident instance with form data
         const newResident = new Resident({
@@ -219,17 +238,11 @@ app.post('/verifyOTP', async (req, res) => {
         const savedResident = await newResident.save();
         console.log("New Resident added:", savedResident);
 
-
         // Generate the QR code containing the phone number
         const qrDataURL = await qr.toDataURL(pnumber);
         // Save the QR code image data to MongoDB linked to the resident document
         savedResident.qr = qrDataURL;
         await savedResident.save();
-        // Clear the OTP from the database
-        savedResident.otp = undefined;
-
-        const resident = await Resident.findOneAndUpdate({ email_id: email }, { otp: otp }, { new: true });
-        await resident.save();
 
         // Redirect to the login page or wherever you want
         res.redirect("/login");
@@ -274,22 +287,27 @@ app.get("/visitor_sign_up", (req, res) => {
 })
 
 app.post("/visitor_sign_up", async (req, res) => {
-    const { name, phone_number, vehicle_number, entryDate, tenure_hours } = req.body;
+    const { name, phone_number, vehicle_number, entryDate, tenure_hours, password } = req.body;
 
     try {
+        const hashedPassword = await bcrypt.hash(password, 10);
         // Create a new Resident instance with form data
         const newVisitor = new Visitor({
             name: name,
             phone_number: phone_number,
             vehicle_number: vehicle_number,
             entry: entryDate,
-            tenure_hours: tenure_hours
+            tenure_hours: tenure_hours,
+            password: hashedPassword
         });
 
         // Save the newResident to the database
         const savedVisitor = await newVisitor.save();
-
         console.log("New Visitor added:", savedVisitor);
+
+        const qrDataURL = await qr.toDataURL(phone_number);
+        savedVisitor.qr = qrDataURL;
+        await savedVisitor.save();
 
         // Redirect to the home page or wherever you want
         res.redirect("/home");
@@ -302,14 +320,32 @@ app.post("/visitor_sign_up", async (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.render('login');
+    res.render('login'); // Assuming one shared login form
 });
 
-app.post('/login', passport.authenticate('local', {
-    successRedirect: '/dashboard',
-    failureRedirect: '/',
-    failureFlash: true
-}));
+app.post('/login', (req, res, next) => {
+    const { email, password } = req.body;
+
+    passport.authenticate('resident-local', {
+        successRedirect: '/dashboard',
+        failureRedirect: '/login', // or a separate visitor login page
+        failureFlash: true,
+    })(req, res, next);
+});
+
+app.get('/visitor-login', (req, res) => {
+    res.render('login_v'); // Assuming one shared login form
+});
+
+app.post('/visitor-login', (req, res, next) => {
+    const { phone_number, password } = req.body;
+
+    passport.authenticate('visitor-local', {
+        successRedirect: '/visitor-dashboard',
+        failureRedirect: '/visitor-login', // or a separate visitor login page
+        failureFlash: true,
+    })(req, res, next);
+});
 
 app.post('/logout', (req, res, next) => {
     req.logout((err) => {
@@ -320,15 +356,13 @@ app.post('/logout', (req, res, next) => {
     });
 });
 
-const ensureAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect('/login');
-};
 
 app.get('/dashboard', ensureAuthenticated, (req, res) => {
     res.render('dashboard', { resident: req.user });
+});
+
+app.get('/visitor-dashboard', ensureAuthenticated, (req, res) => {  // Naming suggestion
+    res.render('dashboard_visitor', { visitor: req.user });
 });
 
 app.get("/", (req, res) => {

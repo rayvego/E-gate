@@ -11,6 +11,10 @@ const visitorSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    password: {
+        type: String,
+        required: true
+    },
     vehicle_number: {
         type: String,
         unique: true
@@ -27,6 +31,10 @@ const visitorSchema = new mongoose.Schema({
     is_expired: {
         type: Boolean,
         default: false
+    },
+    qr: {
+        type: Buffer,
+        default: null
     }
 })
 
