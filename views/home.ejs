@@ -10,7 +10,8 @@
             margin: 0;
             padding: 20px;
             display: flex;
-            justify-content: space-around;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
             height: 100vh;
             background-color: #f7f7f7;
@@ -20,6 +21,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 300px;
         }
 
         h1 {
@@ -61,6 +69,12 @@
             width: 100px; /* Adjust icon size */
             height: 100px; /* Adjust icon size */
             margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .column {
+                width: 100%;
+            }
         }
     </style>
 </head>
