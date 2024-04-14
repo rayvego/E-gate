@@ -38,6 +38,7 @@
             <th>Phone Number</th>
             <th>Vehicle Number</th>
             <th>Entry Time</th>
+            <th>Tenure (in minutes)</th>
             <th>Expired</th>
         </tr>
         </thead>
@@ -48,6 +49,7 @@
                 <td><%= visitor.phone_number %></td>
                 <td><%= visitor.vehicle_number %></td>
                 <td><%= visitor.entry %></td>
+                <td><%= visitor.tenure_hours %></td>
                 <td><%= visitor.is_expired ? 'Yes' : 'No' %></td>
             </tr>
         <% } %>

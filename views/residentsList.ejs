@@ -14,7 +14,7 @@
             <th>Name</th>
             <th>Email</th>
             <th>Phone Number</th>
-            <th>Entry Status</th>
+            <th>In Campus</th>
         </tr>
         </thead>
         <tbody>
@@ -23,7 +23,7 @@
                 <td><%= resident.name %></td>
                 <td><%= resident.email_id %></td>
                 <td><%= resident.phone_number %></td>
-                <td><%= resident.entry ? 'Inside' : 'Outside' %></td>
+                <td><%= resident.entry ? 'False' : 'True' %></td>
             </tr>
         <% } %>
         </tbody>

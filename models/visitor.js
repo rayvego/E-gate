@@ -35,6 +35,10 @@ const visitorSchema = new mongoose.Schema({
     qr: {
         type: Buffer,
         default: null
+    },
+    scanCount: {
+        type: Number,
+        default: 0
     }
 })
 

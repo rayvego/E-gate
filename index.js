@@ -262,6 +262,13 @@ app.post('/scan-qr-code', async (req, res) => {
             if (!visitor) {
                 return res.status(400).send('Invalid QR code or user not found');
             }
+            visitor.scanCount++;
+            // If the scanCount is 2 (scanned for the second time), mark the visitor as expired
+            if (visitor.scanCount === 2) {
+                visitor.isExpired = true;
+            }
+            await visitor.save();
+
             return res.render('userDetails', { user: visitor, userType: 'visitor' });
         }
         return res.render('userDetails', { user: resident, userType: 'resident' });
@@ -323,7 +330,7 @@ app.post("/visitor_sign_up", async (req, res) => {
         await savedVisitor.save();
 
         // Redirect to the home page or wherever you want
-        res.redirect("/home");
+        res.redirect("/visitor-login");
     } catch (error) {
         // If there is an error, handle it
         console.error("Error adding Visitor:", error.message);

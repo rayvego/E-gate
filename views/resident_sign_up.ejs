@@ -5,61 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resident Sign Up</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f7f7f7;
+            padding: 0;
+            background-color: #f6f6f6;
+            background-image: url(https://c.ndtvimg.com/2019-06/5c94c87o_iit-gandhinagar_625x300_17_June_19.jpg);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            backdrop-filter: blur(2px); /* Adjust the blur value as needed */
         }
-        .login-container {
-            max-width: 400px;
-            margin: 0 auto;
+
+        .header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-box {
             background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 400px;
         }
-        h1, h2 {
+
+        h1 {
             text-align: center;
             color: #333;
+            font-size: 28px;
+            margin-bottom: 30px;
         }
+
         form {
             display: grid;
-            gap: 10px;
+            gap: 20px;
         }
+
         label {
-            display: block;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
         }
+
         input[type="text"],
         input[type="email"],
         input[type="password"] {
             width: 100%;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 12px;
             border: 1px solid #ccc;
+            border-radius: 5px;
             box-sizing: border-box;
+            font-size: 14px;
         }
+
         button[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
             background-color: #007bff;
             color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
             font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
         button[type="submit"]:hover {
             background-color: #0056b3;
+        }
+
+        .links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            color: #0056b3;
         }
     </style>
 </head>
 <body>
-<div class="login-container">
-    <h1>Resident Sign Up</h1>
-    <div>
-        <h2>Login Form</h2>
+<div class="header">E-Gate: IIT Gandhinagar</div>
+<div class="container">
+    <div class="login-box">
+        <h1>Resident Sign Up</h1>
         <form action="/resident_sign_up" method="POST">
             <div>
                 <label for="email">Email:</label>
@@ -83,6 +135,10 @@
             </div>
             <button type="submit">Submit</button>
         </form>
+        <div class="links">
+            <a href="/login">Already registered? Login</a>
+            <a href="/">Return home</a>
+        </div>
     </div>
 </div>
 </body>

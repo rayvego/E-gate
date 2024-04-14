@@ -3,6 +3,11 @@
 <head>
     <title>Visitors List</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
+    <style>
+        .expired {
+            color: red;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -20,12 +25,12 @@
         </thead>
         <tbody>
         <% for(let visitor of visitors) { %>
-            <tr>
+            <tr <% if (visitor.isExpired) { %> class="expired" <% } %>>
                 <td><%= visitor.name %></td>
                 <td><%= visitor.phone_number %></td>
                 <td><%= visitor.vehicle_number %></td>
                 <td><%= visitor.entry %></td>
-                <td><%= visitor.is_expired ? 'Yes' : 'No' %></td>
+                <td><%= visitor.isExpired ? 'Yes' : 'No' %></td>
             </tr>
         <% } %>
         </tbody>
