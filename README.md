@@ -22,3 +22,24 @@ The IIT Gandhinagar Gate Entry System currently relies on manual verification, l
 2. **Visitor Authentication:** Additional layers such as mobile verification for visitor authentication.
 3. **Statistics and Visualizations:** Displaying visit frequency through the day for analysis.
    
+### Updates May 2024
+
+1. Form client side and server side validation
+3. Make routes more consistent - naming, logic
+4. Visitor expiry - notification / colored
+5. Make proper database again
+6. Use moments.js to fix display of time
+9. Remove tenure and add exit time/date
+10. Error Handling
+
+2. Security - approved under xyz - each security has own password - (update database schema..)
+7. Authorization on our own + sessions
+8. Cookies
+
+
+##### UI Updates
+
+1. QR Scanner
+2. Security pages showing entries
+3. UI for mobile phones (dynamic screen size)
+4. React based

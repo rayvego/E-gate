@@ -31,6 +31,6 @@ const checkExpiredVisitors = async () => {
 };
 
 // Schedule the job to run every 10 minutes
-cron.schedule('* * * * *', checkExpiredVisitors);
+// cron.schedule('* * * * *', checkExpiredVisitors);
 
 console.log('Scheduled job started');
